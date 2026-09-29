@@ -60,3 +60,19 @@ test('codex TOML editing keeps unrelated content', () => {
   assert.ok(out.includes('# keep me') && out.includes('[mcp_servers.other]') && out.includes('[profiles.fast]'));
   assert.match(codexBlock({ name: 'mcpm', url: 'http://127.0.0.1:1/mcp', token: 't' }), /http_headers = \{ "Authorization" = "Bearer t" \}/);
 });
+
+test('google presets: OAuth needs no folder, spread args and built-in placeholders render', () => {
+  const sa = renderPreset(getPreset('google-sheets')!, { serviceAccountPath: '/k.json' }, { id: 'gs' });
+  assert.deepEqual(sa.env!.map((e) => e.key), ['SERVICE_ACCOUNT_PATH']);
+
+  const oauth = renderPreset(getPreset('google-sheets-oauth')!, { credentialsPath: '/c.json' }, { id: 'sheets' });
+  const token = oauth.env!.find((e) => e.key === 'TOKEN_PATH')!.value;
+  assert.match(token, /\/sheets-google-token\.json$/);
+  assert.ok(!token.includes('{{'));
+
+  const ws = renderPreset(getPreset('google-workspace')!, { clientId: 'id', clientSecret: 's' }, { id: 'gw' });
+  assert.deepEqual(ws.args, ['workspace-mcp', '--tools', 'drive', 'docs', 'sheets', '--tool-tier', 'core', '--read-only']);
+  assert.equal(ws.env!.find((e) => e.key === 'GOOGLE_OAUTH_CLIENT_SECRET')!.secret, true);
+  const all = renderPreset(getPreset('google-workspace')!, { clientId: 'id', clientSecret: 's', services: '' , readOnly: false }, { id: 'gw' });
+  assert.deepEqual(all.args, ['workspace-mcp', '--tool-tier', 'core']);
+});

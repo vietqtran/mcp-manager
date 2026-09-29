@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { PRESETS_FILE } from './paths.js';
+import { DATA_DIR, PRESETS_FILE } from './paths.js';
 import type { KV, ServerDef } from './types.js';
 
 export interface PresetField {
@@ -47,7 +47,9 @@ export function getPreset(id: string): Preset | undefined {
   return loadPresets().find((p) => p.id === id);
 }
 
-const PLACEHOLDER = /\{\{(\w+)\}\}/g;
+/** {{field}} = user value; {{$dataDir}} / {{$id}} = built-ins; {{...field}} (whole arg) = split into several args. */
+const PLACEHOLDER = /\{\{(\$?\w+)\}\}/g;
+const SPREAD = /^\{\{\.\.\.(\w+)\}\}$/;
 
 /** Turn a preset + user-entered values into a concrete server definition. */
 export function renderPreset(
@@ -55,7 +57,7 @@ export function renderPreset(
   input: PresetValues,
   meta: { id: string; name?: string },
 ): ServerDef {
-  const values: PresetValues = {};
+  const values: PresetValues = { $dataDir: DATA_DIR, $id: meta.id };
   for (const f of preset.fields) {
     const v = input[f.key] ?? f.default;
     values[f.key] = typeof v === 'string' ? v.trim() : v;
@@ -71,14 +73,16 @@ export function renderPreset(
     const refs = [...tpl.matchAll(PLACEHOLDER)].map((m) => m[1]);
     return refs.length > 0 && refs.every((k) => fmt(values[k]) === '');
   };
+  const expand = (tpl: string): string[] => {
+    const spread = SPREAD.exec(tpl);
+    if (spread) return fmt(values[spread[1]]).split(/[\s,]+/).filter(Boolean);
+    return refsEmpty(tpl) ? [] : [fill(tpl)];
+  };
 
   const args: string[] = [];
   for (const a of preset.args ?? []) {
-    if (typeof a === 'string') {
-      if (!refsEmpty(a)) args.push(fill(a));
-    } else if (truthy(a.when)) {
-      args.push(...a.args.map(fill));
-    }
+    if (typeof a === 'string') args.push(...expand(a));
+    else if (truthy(a.when)) args.push(...a.args.flatMap((x) => (SPREAD.test(x) ? expand(x) : [fill(x)])));
   }
   const kvs = (map: Record<string, string> | undefined): KV[] =>
     Object.entries(map ?? {})

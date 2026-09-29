@@ -17,7 +17,7 @@ remote VM ───┘    shared by all sessions)        └─ npx mcp-remote h
 
 ## Features
 
-- **Catalog of 34 verified presets.** Covers Atlassian (Rovo OAuth, Cloud API token, Jira/Confluence Server & Data Center PAT with read-only mode), GitHub (remote and Docker), GitLab (self-managed), Playwright, Chrome DevTools, Postgres, MySQL, SQLite, Google Sheets, Slack, Notion, Linear, Sentry, Figma, Context7, Brave Search, Supabase, Kubernetes, Docker, filesystem/git/fetch/memory/time, and more. You fill in a form; the app never asks you to write JSON.
+- **Catalog of 36 verified presets.** Covers Atlassian (Rovo OAuth, Cloud API token, Jira/Confluence Server & Data Center PAT with read-only mode), GitHub (remote and Docker), GitLab (self-managed), Playwright, Chrome DevTools, Postgres, MySQL, SQLite, Google Sheets & Drive (OAuth or service account), Google Workspace, Slack, Notion, Linear, Sentry, Figma, Context7, Brave Search, Supabase, Kubernetes, Docker, filesystem/git/fetch/memory/time, and more. You fill in a form; the app never asks you to write JSON.
 - **Import what you already have.** The app reads MCP servers from Claude Code, Codex, Cursor, VS Code, Gemini CLI, Copilot CLI, Windsurf and opencode configs. You can also paste any `mcpServers` snippet from a README. Import can replace the old entries with the single hub entry, and keeps a backup of the file.
 - **One-click client connection.** The app writes the hub entry into each client's config in that client's own format. Codex TOML is edited without losing your comments.
 - **Remote machines.**

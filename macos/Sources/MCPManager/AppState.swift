@@ -124,8 +124,13 @@ final class AppState {
                 } catch {}
                 if Task.isCancelled { return }
                 try? await Task.sleep(for: .seconds(2))
-                if await !self.api.ping() { self.phase = .connecting } else if self.phase != .running {
+                // The event stream only drops when the engine goes away (restart, update, crash).
+                // Once it answers again, reload everything: presets, settings and clients may have changed.
+                if await !self.api.ping() {
+                    self.phase = .connecting
+                } else {
                     self.phase = .running
+                    self.api.reloadConfig()
                     await self.reloadAll()
                 }
             }

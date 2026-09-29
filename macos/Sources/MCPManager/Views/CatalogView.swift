@@ -46,6 +46,10 @@ struct CatalogView: View {
             }
             .padding(24)
         }
+        .task {
+            await state.loadPresets()
+            await state.refreshStatus()
+        }
         .sheet(item: $installing) { p in PresetInstallSheet(preset: p) }
         .sheet(isPresented: $customOpen) { ServerEditorSheet(existing: nil) { state.created($0) } }
         .sheet(isPresented: $importOpen) { ImportSheet(source: .paste) }
