@@ -97,6 +97,7 @@ struct ServerDef: Codable, Hashable {
     var url: String?
     var headers: [KV]?
     var disabledTools: [String]?
+    var fixedArgs: [KV]?
     var presetId: String?
     var createdAt: String?
     var updatedAt: String?

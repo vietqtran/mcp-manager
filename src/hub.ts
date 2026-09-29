@@ -93,7 +93,9 @@ export class Hub extends EventEmitter {
     if (def.id !== id) throw new Error('Server id cannot be changed');
     this.store.upsert(def);
     const needsRestart = launchKey(u.def) !== launchKey(def);
-    const toolsChanged = JSON.stringify(u.def.disabledTools ?? []) !== JSON.stringify(def.disabledTools ?? []);
+    const toolsChanged =
+      JSON.stringify([u.def.disabledTools ?? [], u.def.fixedArgs ?? []]) !==
+      JSON.stringify([def.disabledTools ?? [], def.fixedArgs ?? []]);
     u.def = def;
     this.emit('servers');
     if (!def.enabled) await u.stop();

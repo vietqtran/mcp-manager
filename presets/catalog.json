@@ -959,6 +959,7 @@
       "command": "uvx",
       "args": [
         "workspace-mcp",
+        "--single-user",
         {
           "when": "services",
           "args": [
@@ -983,7 +984,8 @@
       "env": {
         "GOOGLE_OAUTH_CLIENT_ID": "{{clientId}}",
         "GOOGLE_OAUTH_CLIENT_SECRET": "{{clientSecret}}",
-        "WORKSPACE_MCP_PORT": "{{callbackPort}}"
+        "WORKSPACE_MCP_PORT": "{{callbackPort}}",
+        "USER_GOOGLE_EMAIL": "{{googleEmail}}"
       },
       "fields": [
         {
@@ -999,6 +1001,14 @@
           "label": "OAuth client secret",
           "type": "secret",
           "required": true
+        },
+        {
+          "key": "googleEmail",
+          "label": "Your Google account email",
+          "type": "text",
+          "required": true,
+          "placeholder": "you@company.com",
+          "help": "The account you sign in with. MCP Manager pins it on every call, so AI clients cannot ask for a different account (which would trigger a new sign-in)."
         },
         {
           "key": "services",
@@ -1034,7 +1044,10 @@
         }
       ],
       "notes": "The first tool call asks you to sign in with Google (link or browser on this Mac); the token is cached afterwards. Enable each Google API you use (Drive, Docs, Sheets…) in the same Cloud project, and add yourself as a test user if the consent screen is in Testing mode.",
-      "verifiedSource": "https://pypi.org/pypi/workspace-mcp/json"
+      "verifiedSource": "https://pypi.org/pypi/workspace-mcp/json",
+      "fixedArgs": {
+        "user_google_email": "{{googleEmail}}"
+      }
     },
     {
       "id": "slack",

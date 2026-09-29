@@ -15,7 +15,7 @@ export const VERSION = '0.1.0';
 const startedAt = Date.now();
 
 type KVIn = { key: string; value?: string | null; secret?: boolean; hasValue?: boolean };
-type DefIn = Partial<Omit<ServerDef, 'env' | 'headers'>> & { env?: KVIn[]; headers?: KVIn[] };
+type DefIn = Partial<Omit<ServerDef, 'env' | 'headers' | 'fixedArgs'>> & { env?: KVIn[]; headers?: KVIn[]; fixedArgs?: KVIn[] };
 
 /** Hide secret values from API responses. */
 function publicDef(def: ServerDef, reveal = false) {
@@ -57,6 +57,9 @@ function mergeDef(input: DefIn, prev?: ServerDef): ServerDef {
           headers: merge(input.headers ?? prev?.headers, prev?.headers),
         }),
     disabledTools: input.disabledTools ?? prev?.disabledTools ?? [],
+    fixedArgs: (input.fixedArgs ?? prev?.fixedArgs ?? [])
+      .filter((kv) => kv.key?.trim())
+      .map((kv) => ({ key: kv.key.trim(), value: String(kv.value ?? '') })),
     presetId: prev?.presetId ?? input.presetId,
     createdAt: prev?.createdAt ?? now,
     updatedAt: now,

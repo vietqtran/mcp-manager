@@ -29,6 +29,8 @@ export interface Preset {
   env?: Record<string, string>;
   url?: string;
   headers?: Record<string, string>;
+  /** Tool arguments the hub pins for every call (hidden from clients). */
+  fixedArgs?: Record<string, string>;
   fields: PresetField[];
   notes?: string;
   verifiedSource?: string;
@@ -99,6 +101,7 @@ export function renderPreset(
     ...(preset.transport === 'stdio'
       ? { command: preset.command, args, env: kvs(preset.env) }
       : { url: fill(preset.url ?? ''), headers: kvs(preset.headers) }),
+    ...(preset.fixedArgs ? { fixedArgs: kvs(preset.fixedArgs).map(({ key, value }) => ({ key, value })) } : {}),
     presetId: preset.id,
     createdAt: now,
     updatedAt: now,

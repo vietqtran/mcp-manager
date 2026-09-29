@@ -17,6 +17,7 @@ struct ServerEditorSheet: View {
     @State private var url = ""
     @State private var env: [KVRow] = []
     @State private var headers: [KVRow] = []
+    @State private var fixedArgs: [KVRow] = []
     @State private var enabled = true
     @State private var busy = false
     @State private var error: String?
@@ -69,6 +70,14 @@ struct ServerEditorSheet: View {
                         KVEditor(rows: $headers, keyPlaceholder: "Header", valuePlaceholder: "Bearer …")
                     }
                 }
+                Section {
+                    KVEditor(rows: $fixedArgs, keyPlaceholder: "argument", valuePlaceholder: "value")
+                } header: {
+                    Text("Fixed tool arguments")
+                } footer: {
+                    Text("Hidden from AI clients and always sent with this value, e.g. user_google_email.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
             .formStyle(.grouped)
 
@@ -98,6 +107,7 @@ struct ServerEditorSheet: View {
         url = d.url ?? ""
         env = (d.env ?? []).map(KVRow.init)
         headers = (d.headers ?? []).map(KVRow.init)
+        fixedArgs = (d.fixedArgs ?? []).map(KVRow.init)
         enabled = d.enabled
     }
 
@@ -116,6 +126,7 @@ struct ServerEditorSheet: View {
         def.url = url
         def.env = env.filter { !$0.key.isEmpty }.map(\.kv)
         def.headers = headers.filter { !$0.key.isEmpty }.map(\.kv)
+        def.fixedArgs = fixedArgs.filter { !$0.key.isEmpty }.map { KV(key: $0.key, value: $0.value) }
         do {
             let r: ServerResponse = isNew
                 ? try await state.api.post("servers", def)

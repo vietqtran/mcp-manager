@@ -24,6 +24,8 @@ export interface ServerDef {
   headers?: KV[];
   /** Tools hidden from clients. */
   disabledTools?: string[];
+  /** Tool arguments pinned by the hub: removed from every tool schema and always sent with this value. */
+  fixedArgs?: KV[];
   presetId?: string;
   createdAt: string;
   updatedAt: string;

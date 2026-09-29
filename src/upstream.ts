@@ -66,7 +66,8 @@ export class Upstream extends EventEmitter {
 
   get activeTools(): Tool[] {
     const off = new Set(this.def.disabledTools ?? []);
-    return this.tools.filter((t) => !off.has(t.name));
+    const fixed = new Set((this.def.fixedArgs ?? []).map((kv) => kv.key));
+    return this.tools.filter((t) => !off.has(t.name)).map((t) => (fixed.size ? hideArgs(t, fixed) : t));
   }
 
   async start(): Promise<void> {
@@ -114,7 +115,10 @@ export class Upstream extends EventEmitter {
 
   callTool(name: string, args: Record<string, unknown> | undefined, opts: RequestOptions = {}) {
     if (!this.client || this.status !== 'running') throw new Error(`Server "${this.def.id}" is not running`);
-    return this.client.callTool({ name, arguments: args ?? {} }, undefined, {
+    const pinned: Record<string, unknown> = {};
+    const props = this.tools.find((t) => t.name === name)?.inputSchema?.properties ?? {};
+    for (const kv of this.def.fixedArgs ?? []) if (kv.key in props) pinned[kv.key] = kv.value;
+    return this.client.callTool({ name, arguments: { ...(args ?? {}), ...pinned } }, undefined, {
       timeout: TOOL_TIMEOUT_MS,
       resetTimeoutOnProgress: true,
       ...opts,
@@ -320,4 +324,13 @@ export class Upstream extends EventEmitter {
       /* logging must never crash the daemon */
     }
   }
+}
+
+/** Remove pinned arguments from a tool's input schema so clients never try to fill them in. */
+function hideArgs(tool: Tool, fixed: Set<string>): Tool {
+  const schema = tool.inputSchema;
+  if (!schema?.properties || !Object.keys(schema.properties).some((k) => fixed.has(k))) return tool;
+  const properties = Object.fromEntries(Object.entries(schema.properties).filter(([k]) => !fixed.has(k)));
+  const required = schema.required?.filter((k) => !fixed.has(k));
+  return { ...tool, inputSchema: { ...schema, properties, ...(required ? { required } : {}) } };
 }

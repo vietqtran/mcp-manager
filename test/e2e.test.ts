@@ -150,6 +150,21 @@ test('updating a secret-less field keeps the stored secret; crash triggers auto-
   await c.close();
 });
 
+test('fixed arguments are hidden from clients and always injected', async () => {
+  const { def } = await api('/servers/echo');
+  await api('/servers/echo', { method: 'PUT', body: JSON.stringify({ ...def, fixedArgs: [{ key: 'text', value: 'pinned' }] }) });
+  const c = await mcpClient(`${base}/mcp/echo`);
+  const echo = (await c.listTools()).tools.find((t) => t.name === 'echo')!;
+  assert.deepEqual(Object.keys(echo.inputSchema.properties ?? {}), []);
+  assert.ok(!(echo.inputSchema.required ?? []).includes('text'));
+  const r = await c.callTool({ name: 'echo', arguments: { text: 'client-value' } });
+  assert.match((r.content as any)[0].text, /^echo:pinned:/);
+  const add = (await c.listTools()).tools.find((t) => t.name === 'add')!;
+  assert.deepEqual(Object.keys(add.inputSchema.properties ?? {}).sort(), ['a', 'b']);
+  await c.close();
+  await api('/servers/echo', { method: 'PUT', body: JSON.stringify({ ...def, fixedArgs: [] }) });
+});
+
 test('rejects cross-origin browser requests and non-local Host headers', async () => {
   const evil = await fetch(`${base}/api/servers`, { headers: { Origin: 'https://evil.example' } });
   assert.equal(evil.status, 403);

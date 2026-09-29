@@ -70,9 +70,10 @@ test('google presets: OAuth needs no folder, spread args and built-in placeholde
   assert.match(token, /\/sheets-google-token\.json$/);
   assert.ok(!token.includes('{{'));
 
-  const ws = renderPreset(getPreset('google-workspace')!, { clientId: 'id', clientSecret: 's' }, { id: 'gw' });
-  assert.deepEqual(ws.args, ['workspace-mcp', '--tools', 'drive', 'docs', 'sheets', '--tool-tier', 'core', '--read-only']);
+  const ws = renderPreset(getPreset('google-workspace')!, { clientId: 'id', clientSecret: 's', googleEmail: 'me@x.io' }, { id: 'gw' });
+  assert.deepEqual(ws.fixedArgs, [{ key: 'user_google_email', value: 'me@x.io' }]);
+  assert.deepEqual(ws.args, ['workspace-mcp', '--single-user', '--tools', 'drive', 'docs', 'sheets', '--tool-tier', 'core', '--read-only']);
   assert.equal(ws.env!.find((e) => e.key === 'GOOGLE_OAUTH_CLIENT_SECRET')!.secret, true);
-  const all = renderPreset(getPreset('google-workspace')!, { clientId: 'id', clientSecret: 's', services: '' , readOnly: false }, { id: 'gw' });
-  assert.deepEqual(all.args, ['workspace-mcp', '--tool-tier', 'core']);
+  const all = renderPreset(getPreset('google-workspace')!, { clientId: 'id', clientSecret: 's', googleEmail: 'me@x.io', services: '', readOnly: false }, { id: 'gw' });
+  assert.deepEqual(all.args, ['workspace-mcp', '--single-user', '--tool-tier', 'core']);
 });

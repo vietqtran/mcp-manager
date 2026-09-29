@@ -386,6 +386,7 @@ struct ConfigTab: View {
                             LabeledContent("URL") { Text(def.url ?? "").fontDesign(.monospaced).textSelection(.enabled) }
                             kvSection("Headers", def.headers ?? [])
                         }
+                        if let fixed = def.fixedArgs, !fixed.isEmpty { kvSection("Fixed tool arguments", fixed) }
                         if let p = def.presetId { LabeledContent("Created from preset") { Text(p) } }
                     }
                     .formStyle(.grouped)
