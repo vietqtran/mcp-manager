@@ -1,0 +1,59 @@
+{
+  "name": "mcp-manager",
+  "version": "0.1.0",
+  "description": "Local MCP hub for macOS: run every MCP server once, manage them from a web UI, and share them with Claude Code, Codex, Cursor, VS Code and remote machines over SSH.",
+  "license": "MIT",
+  "author": "vietqtran",
+  "homepage": "https://github.com/vietqtran/mcp-manager#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vietqtran/mcp-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vietqtran/mcp-manager/issues"
+  },
+  "type": "module",
+  "bin": {
+    "mcp-manager": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "presets",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "npm run build:engine && npm run build:app",
+    "build:engine": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/cli.js --banner:js=\"#!/usr/bin/env node\nimport { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);\" --log-level=warning",
+    "build:app": "bash scripts/build-app.sh",
+    "dev:engine": "tsx watch src/cli.ts start",
+    "start": "node dist/cli.js start",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude-code",
+    "codex",
+    "gateway",
+    "proxy",
+    "macos"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "express": "^5.2.1",
+    "smol-toml": "^1.9.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.3",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

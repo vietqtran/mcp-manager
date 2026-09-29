@@ -1,0 +1,693 @@
+{
+  "version": 1,
+  "updated": "2026-09-29",
+  "presets": [
+    {
+      "id": "atlassian-rovo-remote",
+      "name": "Atlassian Rovo (Official, OAuth)",
+      "provider": "Atlassian",
+      "category": "project-management",
+      "description": "Official Atlassian remote MCP server for Jira, Confluence, JSM, Bitbucket and Compass Cloud via OAuth, bridged locally with mcp-remote.",
+      "homepage": "https://github.com/atlassian/atlassian-mcp-server",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v2/mcp"],
+      "fields": [],
+      "notes": "Cloud only. First start opens a browser on this Mac for Atlassian OAuth; tokens are cached in ~/.mcp-auth. The legacy /v1/sse endpoint was retired after 2026-06-30.",
+      "verifiedSource": "https://github.com/atlassian/atlassian-mcp-server"
+    },
+    {
+      "id": "atlassian-cloud",
+      "name": "Jira + Confluence (Cloud, API token)",
+      "provider": "Atlassian",
+      "category": "project-management",
+      "description": "Community mcp-atlassian server for Atlassian Cloud Jira and Confluence using email + API token.",
+      "homepage": "https://github.com/sooperset/mcp-atlassian",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "{{jiraUrl}}",
+        "JIRA_USERNAME": "{{email}}",
+        "JIRA_API_TOKEN": "{{apiToken}}",
+        "CONFLUENCE_URL": "{{confluenceUrl}}",
+        "CONFLUENCE_USERNAME": "{{email}}",
+        "CONFLUENCE_API_TOKEN": "{{apiToken}}",
+        "READ_ONLY_MODE": "{{readOnly}}",
+        "JIRA_PROJECTS_FILTER": "{{jiraProjectsFilter}}",
+        "CONFLUENCE_SPACES_FILTER": "{{confluenceSpacesFilter}}"
+      },
+      "fields": [
+        { "key": "jiraUrl", "label": "Jira URL", "type": "url", "required": true, "placeholder": "https://your-company.atlassian.net" },
+        { "key": "confluenceUrl", "label": "Confluence URL", "type": "url", "placeholder": "https://your-company.atlassian.net/wiki", "help": "Usually your site + /wiki. Leave blank to disable Confluence." },
+        { "key": "email", "label": "Account email", "type": "text", "required": true, "placeholder": "you@example.com" },
+        { "key": "apiToken", "label": "API token", "type": "secret", "required": true, "help": "Create at https://id.atlassian.com/manage-profile/security/api-tokens" },
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true, "help": "Disables all write/create/update tools." },
+        { "key": "jiraProjectsFilter", "label": "Jira projects filter", "type": "text", "placeholder": "PROJ,OPS", "help": "Optional comma-separated project keys." },
+        { "key": "confluenceSpacesFilter", "label": "Confluence spaces filter", "type": "text", "placeholder": "DEV,DOC", "help": "Optional comma-separated space keys." }
+      ],
+      "notes": "The same API token works for Jira and Confluence Cloud. ENABLED_TOOLS / TOOLSETS env vars allow finer tool control.",
+      "verifiedSource": "https://raw.githubusercontent.com/sooperset/mcp-atlassian/main/.env.example"
+    },
+    {
+      "id": "jira-server",
+      "name": "Jira (Server / Data Center, PAT)",
+      "provider": "Atlassian",
+      "category": "project-management",
+      "description": "mcp-atlassian server for self-hosted Jira Server/Data Center using a Personal Access Token.",
+      "homepage": "https://github.com/sooperset/mcp-atlassian",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-atlassian"],
+      "env": {
+        "JIRA_URL": "{{jiraUrl}}",
+        "JIRA_PERSONAL_TOKEN": "{{personalToken}}",
+        "JIRA_SSL_VERIFY": "{{sslVerify}}",
+        "READ_ONLY_MODE": "{{readOnly}}",
+        "JIRA_PROJECTS_FILTER": "{{jiraProjectsFilter}}"
+      },
+      "fields": [
+        { "key": "jiraUrl", "label": "Jira base URL", "type": "url", "required": true, "placeholder": "https://jira.your-company.com" },
+        { "key": "personalToken", "label": "Personal Access Token", "type": "secret", "required": true, "help": "Jira profile > Personal Access Tokens (Server/DC 8.14+)." },
+        { "key": "sslVerify", "label": "Verify SSL certificate", "type": "boolean", "default": true, "help": "Turn off only for self-signed certificates on internal hosts." },
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true },
+        { "key": "jiraProjectsFilter", "label": "Jira projects filter", "type": "text", "placeholder": "PROJ,OPS", "help": "Optional comma-separated project keys." }
+      ],
+      "notes": "Server/DC uses JIRA_PERSONAL_TOKEN instead of username + API token.",
+      "verifiedSource": "https://raw.githubusercontent.com/sooperset/mcp-atlassian/main/.env.example"
+    },
+    {
+      "id": "confluence-server",
+      "name": "Confluence (Server / Data Center, PAT)",
+      "provider": "Atlassian",
+      "category": "docs",
+      "description": "mcp-atlassian server for self-hosted Confluence Server/Data Center using a Personal Access Token.",
+      "homepage": "https://github.com/sooperset/mcp-atlassian",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-atlassian"],
+      "env": {
+        "CONFLUENCE_URL": "{{confluenceUrl}}",
+        "CONFLUENCE_PERSONAL_TOKEN": "{{personalToken}}",
+        "CONFLUENCE_SSL_VERIFY": "{{sslVerify}}",
+        "READ_ONLY_MODE": "{{readOnly}}",
+        "CONFLUENCE_SPACES_FILTER": "{{confluenceSpacesFilter}}"
+      },
+      "fields": [
+        { "key": "confluenceUrl", "label": "Confluence base URL", "type": "url", "required": true, "placeholder": "https://confluence.your-company.com" },
+        { "key": "personalToken", "label": "Personal Access Token", "type": "secret", "required": true, "help": "Confluence profile > Personal Access Tokens." },
+        { "key": "sslVerify", "label": "Verify SSL certificate", "type": "boolean", "default": true },
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true },
+        { "key": "confluenceSpacesFilter", "label": "Confluence spaces filter", "type": "text", "placeholder": "DEV,DOC", "help": "Optional comma-separated space keys." }
+      ],
+      "notes": "For Data Center the URL usually has no /wiki suffix.",
+      "verifiedSource": "https://raw.githubusercontent.com/sooperset/mcp-atlassian/main/.env.example"
+    },
+    {
+      "id": "github-remote",
+      "name": "GitHub (Official Remote)",
+      "provider": "GitHub",
+      "category": "code",
+      "description": "GitHub's hosted MCP server over HTTP, authenticated with a Personal Access Token.",
+      "homepage": "https://github.com/github/github-mcp-server",
+      "runtime": "remote",
+      "transport": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {{token}}",
+        "X-MCP-Readonly": "{{readOnly}}",
+        "X-MCP-Toolsets": "{{toolsets}}"
+      },
+      "fields": [
+        { "key": "token", "label": "GitHub PAT", "type": "secret", "required": true, "help": "Fine-grained or classic PAT: https://github.com/settings/personal-access-tokens" },
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true, "help": "Sent as the X-MCP-Readonly header." },
+        { "key": "toolsets", "label": "Toolsets", "type": "text", "placeholder": "repos,issues,pull_requests", "help": "Optional comma-separated toolsets; blank = defaults." }
+      ],
+      "verifiedSource": "https://raw.githubusercontent.com/github/github-mcp-server/main/docs/remote-server.md"
+    },
+    {
+      "id": "github-local",
+      "name": "GitHub (Local, Docker)",
+      "provider": "GitHub",
+      "category": "code",
+      "description": "GitHub's official MCP server in Docker; supports GitHub.com and GitHub Enterprise Server.",
+      "homepage": "https://github.com/github/github-mcp-server",
+      "runtime": "docker",
+      "transport": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        { "when": "toolsets", "args": ["-e", "GITHUB_TOOLSETS"] },
+        { "when": "readOnly", "args": ["-e", "GITHUB_READ_ONLY"] },
+        { "when": "githubHost", "args": ["-e", "GITHUB_HOST"] },
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{{token}}",
+        "GITHUB_TOOLSETS": "{{toolsets}}",
+        "GITHUB_READ_ONLY": "1",
+        "GITHUB_HOST": "{{githubHost}}"
+      },
+      "fields": [
+        { "key": "token", "label": "GitHub PAT", "type": "secret", "required": true, "help": "https://github.com/settings/personal-access-tokens" },
+        { "key": "toolsets", "label": "Toolsets", "type": "text", "placeholder": "repos,issues,pull_requests", "help": "Optional comma-separated toolsets; blank = defaults." },
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true },
+        { "key": "githubHost", "label": "GitHub Enterprise host", "type": "url", "placeholder": "https://ghe.your-company.com", "help": "Only for GitHub Enterprise Server." }
+      ],
+      "notes": "Requires Docker Desktop running.",
+      "verifiedSource": "https://github.com/github/github-mcp-server"
+    },
+    {
+      "id": "gitlab",
+      "name": "GitLab (gitlab.com / self-managed)",
+      "provider": "GitLab",
+      "category": "code",
+      "description": "Community GitLab MCP server (@zereight/mcp-gitlab) for gitlab.com and self-managed instances.",
+      "homepage": "https://github.com/zereight/gitlab-mcp",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@zereight/mcp-gitlab@latest"],
+      "env": {
+        "GITLAB_PERSONAL_ACCESS_TOKEN": "{{token}}",
+        "GITLAB_API_URL": "{{apiUrl}}",
+        "GITLAB_PERMISSION_MODE": "{{permissionMode}}"
+      },
+      "fields": [
+        { "key": "token", "label": "Personal Access Token", "type": "secret", "required": true, "help": "<instance>/-/user_settings/personal_access_tokens (scope: api or read_api)." },
+        { "key": "apiUrl", "label": "GitLab API URL", "type": "url", "required": true, "default": "https://gitlab.com/api/v4", "placeholder": "https://gitlab.your-company.com/api/v4", "help": "Instance URL + /api/v4." },
+        { "key": "permissionMode", "label": "Permission mode", "type": "select", "options": ["readonly", "modify", "full"], "default": "readonly", "help": "readonly hides every mutating tool." }
+      ],
+      "notes": "GITLAB_PERMISSION_MODE replaces the older GITLAB_READ_ONLY_MODE. GitLab 18.6+ also ships a built-in MCP endpoint on the instance itself.",
+      "verifiedSource": "https://github.com/zereight/gitlab-mcp"
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright",
+      "provider": "Microsoft",
+      "category": "browser",
+      "description": "Official Playwright MCP server for browser automation.",
+      "homepage": "https://github.com/microsoft/playwright-mcp",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", "@playwright/mcp@latest",
+        { "when": "browser", "args": ["--browser", "{{browser}}"] },
+        { "when": "headless", "args": ["--headless"] },
+        { "when": "isolated", "args": ["--isolated"] }
+      ],
+      "fields": [
+        { "key": "browser", "label": "Browser", "type": "select", "options": ["chrome", "msedge", "firefox", "webkit"], "default": "chrome" },
+        { "key": "headless", "label": "Headless", "type": "boolean", "default": true, "help": "Recommended when the hub runs in the background." },
+        { "key": "isolated", "label": "Isolated profile", "type": "boolean", "default": true, "help": "Keep the browser profile in memory." }
+      ],
+      "notes": "One shared browser serves every client session. Extra capabilities via --caps (vision, pdf, devtools).",
+      "verifiedSource": "https://registry.npmjs.org/@playwright/mcp/latest"
+    },
+    {
+      "id": "chrome-devtools",
+      "name": "Chrome DevTools",
+      "provider": "Google",
+      "category": "browser",
+      "description": "Chrome DevTools MCP server for debugging, performance traces and live inspection.",
+      "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", "chrome-devtools-mcp@latest",
+        { "when": "channel", "args": ["--channel", "{{channel}}"] },
+        { "when": "headless", "args": ["--headless"] },
+        { "when": "isolated", "args": ["--isolated"] }
+      ],
+      "fields": [
+        { "key": "channel", "label": "Chrome channel", "type": "select", "options": ["stable", "canary", "beta", "dev"], "default": "stable" },
+        { "key": "headless", "label": "Headless", "type": "boolean", "default": false },
+        { "key": "isolated", "label": "Isolated profile", "type": "boolean", "default": false, "help": "Temporary user-data-dir cleared on close." }
+      ],
+      "notes": "Requires Google Chrome installed.",
+      "verifiedSource": "https://registry.npmjs.org/chrome-devtools-mcp/latest"
+    },
+    {
+      "id": "filesystem",
+      "name": "Filesystem",
+      "provider": "Model Context Protocol",
+      "category": "utility",
+      "description": "Reference filesystem server scoped to explicitly allowed directories.",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "{{dir1}}", "{{dir2}}", "{{dir3}}"],
+      "fields": [
+        { "key": "dir1", "label": "Allowed directory 1", "type": "path", "required": true, "placeholder": "/Users/you/projects" },
+        { "key": "dir2", "label": "Allowed directory 2", "type": "path" },
+        { "key": "dir3", "label": "Allowed directory 3", "type": "path" }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@modelcontextprotocol/server-filesystem/latest"
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "provider": "Model Context Protocol",
+      "category": "code",
+      "description": "Reference Git server for reading, searching and manipulating local repositories.",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-git", { "when": "repository", "args": ["--repository", "{{repository}}"] }],
+      "fields": [
+        { "key": "repository", "label": "Repository path", "type": "path", "help": "Optional; omit to pass repos at call time." }
+      ],
+      "verifiedSource": "https://pypi.org/pypi/mcp-server-git/json"
+    },
+    {
+      "id": "fetch",
+      "name": "Fetch",
+      "provider": "Model Context Protocol",
+      "category": "utility",
+      "description": "Reference server that fetches web pages and converts them to markdown.",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch",
+        { "when": "ignoreRobots", "args": ["--ignore-robots-txt"] },
+        { "when": "userAgent", "args": ["--user-agent", "{{userAgent}}"] }
+      ],
+      "fields": [
+        { "key": "ignoreRobots", "label": "Ignore robots.txt", "type": "boolean", "default": false },
+        { "key": "userAgent", "label": "Custom User-Agent", "type": "text" }
+      ],
+      "verifiedSource": "https://pypi.org/pypi/mcp-server-fetch/json"
+    },
+    {
+      "id": "memory",
+      "name": "Memory (Knowledge Graph)",
+      "provider": "Model Context Protocol",
+      "category": "utility",
+      "description": "Reference persistent-memory server backed by a local knowledge-graph file.",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": { "MEMORY_FILE_PATH": "{{memoryFilePath}}" },
+      "fields": [
+        { "key": "memoryFilePath", "label": "Memory file path", "type": "path", "placeholder": "/Users/you/.mcp-manager/memory.jsonl", "help": "Optional; defaults to memory.jsonl inside the npx cache." }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@modelcontextprotocol/server-memory/latest"
+    },
+    {
+      "id": "sequential-thinking",
+      "name": "Sequential Thinking",
+      "provider": "Model Context Protocol",
+      "category": "utility",
+      "description": "Reference server providing a structured step-by-step reasoning tool.",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "fields": [],
+      "verifiedSource": "https://registry.npmjs.org/@modelcontextprotocol/server-sequential-thinking/latest"
+    },
+    {
+      "id": "time",
+      "name": "Time",
+      "provider": "Model Context Protocol",
+      "category": "utility",
+      "description": "Reference server for current time and timezone conversions.",
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/time",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-time", { "when": "timezone", "args": ["--local-timezone", "{{timezone}}"] }],
+      "fields": [
+        { "key": "timezone", "label": "Local timezone", "type": "text", "placeholder": "Asia/Ho_Chi_Minh", "help": "Optional IANA name; auto-detected if omitted." }
+      ],
+      "verifiedSource": "https://pypi.org/pypi/mcp-server-time/json"
+    },
+    {
+      "id": "context7",
+      "name": "Context7 (Local)",
+      "provider": "Upstash",
+      "category": "docs",
+      "description": "Up-to-date library and framework documentation lookup.",
+      "homepage": "https://github.com/upstash/context7",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": { "CONTEXT7_API_KEY": "{{apiKey}}" },
+      "fields": [
+        { "key": "apiKey", "label": "API key", "type": "secret", "help": "Optional; raises rate limits. https://context7.com/dashboard" }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@upstash/context7-mcp/latest"
+    },
+    {
+      "id": "context7-remote",
+      "name": "Context7 (Remote)",
+      "provider": "Upstash",
+      "category": "docs",
+      "description": "Context7 hosted endpoint with optional API-key bearer auth.",
+      "homepage": "https://context7.com",
+      "runtime": "remote",
+      "transport": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": { "Authorization": "Bearer {{apiKey}}" },
+      "fields": [
+        { "key": "apiKey", "label": "API key", "type": "secret", "help": "Optional; anonymous access is rate-limited. https://context7.com/dashboard" }
+      ],
+      "verifiedSource": "https://github.com/upstash/context7"
+    },
+    {
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "provider": "Crystal DBA",
+      "category": "database",
+      "description": "Postgres MCP Pro with health checks, index tuning and a safe restricted (read-only) mode.",
+      "homepage": "https://github.com/crystaldba/postgres-mcp",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["postgres-mcp", "--access-mode={{accessMode}}"],
+      "env": { "DATABASE_URI": "{{databaseUri}}" },
+      "fields": [
+        { "key": "databaseUri", "label": "Database URI", "type": "secret", "required": true, "placeholder": "postgresql://user:pass@localhost:5432/dbname" },
+        { "key": "accessMode", "label": "Access mode", "type": "select", "options": ["restricted", "unrestricted"], "default": "restricted", "help": "restricted = read-only transactions + resource limits." }
+      ],
+      "notes": "Replaces the archived @modelcontextprotocol/server-postgres.",
+      "verifiedSource": "https://pypi.org/pypi/postgres-mcp/json"
+    },
+    {
+      "id": "mysql",
+      "name": "MySQL",
+      "provider": "benborla",
+      "category": "database",
+      "description": "MySQL server that is read-only by default, with opt-in write operations.",
+      "homepage": "https://github.com/benborla/mcp-server-mysql",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "{{host}}",
+        "MYSQL_PORT": "{{port}}",
+        "MYSQL_USER": "{{user}}",
+        "MYSQL_PASS": "{{password}}",
+        "MYSQL_DB": "{{database}}",
+        "ALLOW_INSERT_OPERATION": "{{allowWrite}}",
+        "ALLOW_UPDATE_OPERATION": "{{allowWrite}}",
+        "ALLOW_DELETE_OPERATION": "{{allowWrite}}"
+      },
+      "fields": [
+        { "key": "host", "label": "Host", "type": "text", "required": true, "default": "127.0.0.1" },
+        { "key": "port", "label": "Port", "type": "number", "default": "3306" },
+        { "key": "user", "label": "User", "type": "text", "required": true },
+        { "key": "password", "label": "Password", "type": "secret" },
+        { "key": "database", "label": "Database", "type": "text", "help": "Leave blank for multi-database mode." },
+        { "key": "allowWrite", "label": "Allow INSERT/UPDATE/DELETE", "type": "boolean", "default": false, "help": "Off = read-only (recommended)." }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@benborla29/mcp-server-mysql/latest"
+    },
+    {
+      "id": "sqlite",
+      "name": "SQLite",
+      "provider": "Model Context Protocol (archived)",
+      "category": "database",
+      "description": "Reference SQLite server for querying a local database file.",
+      "homepage": "https://github.com/modelcontextprotocol/servers-archived/tree/main/src/sqlite",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "{{dbPath}}"],
+      "fields": [
+        { "key": "dbPath", "label": "Database file path", "type": "path", "required": true, "placeholder": "/path/to/database.db" }
+      ],
+      "notes": "Archived upstream but still functional.",
+      "verifiedSource": "https://pypi.org/pypi/mcp-server-sqlite/json"
+    },
+    {
+      "id": "google-sheets",
+      "name": "Google Sheets + Drive",
+      "provider": "xing5",
+      "category": "productivity",
+      "description": "Google Sheets/Drive server using a service account scoped to a shared Drive folder.",
+      "homepage": "https://github.com/xing5/mcp-google-sheets",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-google-sheets@latest"],
+      "env": {
+        "SERVICE_ACCOUNT_PATH": "{{serviceAccountPath}}",
+        "DRIVE_FOLDER_ID": "{{driveFolderId}}"
+      },
+      "fields": [
+        { "key": "serviceAccountPath", "label": "Service account JSON path", "type": "path", "required": true, "help": "Enable Sheets + Drive API at https://console.cloud.google.com and create a service account key." },
+        { "key": "driveFolderId", "label": "Drive folder ID", "type": "text", "required": true, "help": "Share the folder with the service account's client_email as Editor; copy the ID from its URL." }
+      ],
+      "notes": "OAuth mode is also supported via CREDENTIALS_PATH + TOKEN_PATH.",
+      "verifiedSource": "https://pypi.org/pypi/mcp-google-sheets/json"
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "provider": "korotovsky",
+      "category": "productivity",
+      "description": "Maintained community Slack server (successor of the archived reference server).",
+      "homepage": "https://github.com/korotovsky/slack-mcp-server",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "slack-mcp-server@latest", "--transport", "stdio"],
+      "env": { "SLACK_MCP_XOXP_TOKEN": "{{xoxpToken}}", "SLACK_MCP_ADD_MESSAGE_TOOL": "{{allowPost}}" },
+      "fields": [
+        { "key": "xoxpToken", "label": "Slack user token (xoxp-)", "type": "secret", "required": true, "help": "See the server README for token setup." },
+        { "key": "allowPost", "label": "Allow posting messages", "type": "boolean", "default": false }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/slack-mcp-server/latest"
+    },
+    {
+      "id": "notion",
+      "name": "Notion (Local, token)",
+      "provider": "Notion",
+      "category": "productivity",
+      "description": "Official Notion server run locally with an internal integration token.",
+      "homepage": "https://github.com/makenotion/notion-mcp-server",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": { "NOTION_TOKEN": "{{token}}" },
+      "fields": [
+        { "key": "token", "label": "Integration token (ntn_)", "type": "secret", "required": true, "help": "https://www.notion.so/my-integrations — then share pages with the integration." }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@notionhq/notion-mcp-server/latest"
+    },
+    {
+      "id": "notion-remote",
+      "name": "Notion (Remote, OAuth)",
+      "provider": "Notion",
+      "category": "productivity",
+      "description": "Notion's hosted MCP endpoint, bridged locally with mcp-remote.",
+      "homepage": "https://developers.notion.com/docs/mcp",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+      "fields": [],
+      "notes": "First start opens a browser on this Mac for OAuth.",
+      "verifiedSource": "https://developers.notion.com/docs/mcp"
+    },
+    {
+      "id": "linear",
+      "name": "Linear (OAuth)",
+      "provider": "Linear",
+      "category": "project-management",
+      "description": "Linear's hosted MCP endpoint, bridged locally with mcp-remote.",
+      "homepage": "https://linear.app/docs/mcp",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "{{endpoint}}"],
+      "fields": [
+        { "key": "endpoint", "label": "Endpoint", "type": "select", "options": ["https://mcp.linear.app/mcp", "https://mcp.linear.app/mcp/readonly"], "default": "https://mcp.linear.app/mcp" }
+      ],
+      "notes": "First start opens a browser on this Mac for OAuth.",
+      "verifiedSource": "https://linear.app/docs/mcp"
+    },
+    {
+      "id": "sentry",
+      "name": "Sentry (OAuth)",
+      "provider": "Sentry",
+      "category": "devops",
+      "description": "Sentry's hosted MCP endpoint for issues and errors, bridged with mcp-remote.",
+      "homepage": "https://mcp.sentry.dev/",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.sentry.dev/mcp"],
+      "fields": [],
+      "notes": "First start opens a browser on this Mac for OAuth.",
+      "verifiedSource": "https://mcp.sentry.dev/"
+    },
+    {
+      "id": "figma-desktop",
+      "name": "Figma (Dev Mode, desktop app)",
+      "provider": "Figma",
+      "category": "design",
+      "description": "Local Dev Mode MCP server built into the Figma desktop app.",
+      "homepage": "https://developers.figma.com/docs/figma-mcp-server/",
+      "runtime": "remote",
+      "transport": "http",
+      "url": "http://127.0.0.1:3845/mcp",
+      "fields": [],
+      "notes": "Requires the Figma desktop app open with the Dev Mode MCP server enabled.",
+      "verifiedSource": "https://developers.figma.com/docs/figma-mcp-server/local-server-installation"
+    },
+    {
+      "id": "figma-remote",
+      "name": "Figma (Remote, OAuth)",
+      "provider": "Figma",
+      "category": "design",
+      "description": "Figma's hosted MCP endpoint, bridged locally with mcp-remote.",
+      "homepage": "https://developers.figma.com/docs/figma-mcp-server/",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.figma.com/mcp"],
+      "fields": [],
+      "notes": "First start opens a browser on this Mac for OAuth.",
+      "verifiedSource": "https://developers.figma.com/docs/figma-mcp-server/"
+    },
+    {
+      "id": "figma-framelink",
+      "name": "Figma (Framelink, API key)",
+      "provider": "Framelink",
+      "category": "design",
+      "description": "Third-party Figma server that reads designs using a Figma personal access token.",
+      "homepage": "https://github.com/GLips/Figma-Context-MCP",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": { "FIGMA_API_KEY": "{{apiKey}}" },
+      "fields": [
+        { "key": "apiKey", "label": "Figma API key", "type": "secret", "required": true, "help": "Figma > Settings > Security > Personal access tokens." }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/figma-developer-mcp/latest"
+    },
+    {
+      "id": "brave-search",
+      "name": "Brave Search",
+      "provider": "Brave",
+      "category": "search",
+      "description": "Brave's official web and local search server.",
+      "homepage": "https://github.com/brave/brave-search-mcp-server",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
+      "env": { "BRAVE_API_KEY": "{{apiKey}}" },
+      "fields": [
+        { "key": "apiKey", "label": "Brave API key", "type": "secret", "required": true, "help": "https://api-dashboard.search.brave.com/app/keys" }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@brave/brave-search-mcp-server/latest"
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase",
+      "provider": "Supabase",
+      "category": "database",
+      "description": "Official Supabase server for managing a project, with a read-only flag.",
+      "homepage": "https://github.com/supabase/mcp",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", "@supabase/mcp-server-supabase@latest",
+        { "when": "readOnly", "args": ["--read-only"] },
+        "--project-ref={{projectRef}}"
+      ],
+      "env": { "SUPABASE_ACCESS_TOKEN": "{{accessToken}}" },
+      "fields": [
+        { "key": "accessToken", "label": "Access token (PAT)", "type": "secret", "required": true, "help": "https://supabase.com/dashboard/account/tokens" },
+        { "key": "projectRef", "label": "Project ref", "type": "text", "required": true },
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/@supabase/mcp-server-supabase/latest"
+    },
+    {
+      "id": "kubernetes",
+      "name": "Kubernetes",
+      "provider": "Flux159",
+      "category": "devops",
+      "description": "Kubernetes server for inspecting and managing clusters, with a read-only mode.",
+      "homepage": "https://github.com/Flux159/mcp-server-kubernetes",
+      "runtime": "node",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-server-kubernetes"],
+      "env": {
+        "ALLOW_ONLY_READONLY_TOOLS": "{{readOnly}}",
+        "KUBECONFIG_PATH": "{{kubeconfigPath}}",
+        "K8S_CONTEXT": "{{context}}"
+      },
+      "fields": [
+        { "key": "readOnly", "label": "Read-only mode", "type": "boolean", "default": true },
+        { "key": "kubeconfigPath", "label": "Kubeconfig path", "type": "path", "help": "Optional; defaults to ~/.kube/config." },
+        { "key": "context", "label": "Kube context", "type": "text" }
+      ],
+      "verifiedSource": "https://registry.npmjs.org/mcp-server-kubernetes/latest"
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "provider": "ckreiling",
+      "category": "devops",
+      "description": "Manage local or remote Docker containers, images, volumes and networks.",
+      "homepage": "https://github.com/ckreiling/mcp-server-docker",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-docker"],
+      "env": { "DOCKER_HOST": "{{dockerHost}}" },
+      "fields": [
+        { "key": "dockerHost", "label": "Docker host", "type": "text", "placeholder": "ssh://user@host or tcp://host:2375", "help": "Optional; omit for the local engine." }
+      ],
+      "verifiedSource": "https://pypi.org/pypi/mcp-server-docker/json"
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "provider": "MarkusPfundstein",
+      "category": "productivity",
+      "description": "Read and search an Obsidian vault via the Local REST API plugin.",
+      "homepage": "https://github.com/MarkusPfundstein/mcp-obsidian",
+      "runtime": "python",
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["mcp-obsidian"],
+      "env": {
+        "OBSIDIAN_API_KEY": "{{apiKey}}",
+        "OBSIDIAN_HOST": "{{host}}",
+        "OBSIDIAN_PORT": "{{port}}"
+      },
+      "fields": [
+        { "key": "apiKey", "label": "Obsidian API key", "type": "secret", "required": true, "help": "From the 'Local REST API' community plugin settings." },
+        { "key": "host", "label": "Host", "type": "text", "default": "127.0.0.1" },
+        { "key": "port", "label": "Port", "type": "number", "default": "27124" }
+      ],
+      "verifiedSource": "https://pypi.org/pypi/mcp-obsidian/json"
+    }
+  ]
+}
